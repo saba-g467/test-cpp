@@ -24,21 +24,22 @@ jobs:
           conan profile detect
 
       - name: Create tether_sum Conan package
+        working-directory: test/sample1/tether_sum
         run: |
-          conan create .
+          conan create . --build=missing
 
       - name: Install consumer dependencies
-        working-directory: ../tether_sum_package_test
+        working-directory: test/sample1/tether_sum_package_test
         run: |
           conan install . --build=missing
 
       - name: Build consumer project
-        working-directory: ../tether_sum_package_test
+        working-directory: test/sample1/tether_sum_package_test
         run: |
           cmake --preset conan-release
           cmake --build --preset conan-release
 
       - name: Run consumer executable
-        working-directory: ../tether_sum_package_test
+        working-directory: test/sample1/tether_sum_package_test
         run: |
           ./build/Release/tether_sum_package_test

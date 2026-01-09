@@ -12,12 +12,30 @@ jobs:
 
   build-test:
     name: Build and Test
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
     uses: saba-g467/test-cpp-shared-actions/.github/workflows/cpp-build-test.yml@main
-    with:
-      os: ${{ matrix.os }}
+
+  version-suffix-preview:
+    name: Build with Version Suffix (Preview)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Conan
+        run: pip install conan
+
+      - name: Build with version suffix
+        working-directory: test/sample1/tether_sum
+        env:
+          CONAN_VERSION_SUFFIX: dev-${{ github.sha }}
+        run: |
+          echo "Building package with version suffix: dev-${GITHUB_SHA::7}"
+          conan create . -o build_tests=True -o run_tests=True --build=missing
 
   lock-check:
     name: Verify Conan Lock
@@ -38,6 +56,7 @@ jobs:
         run: conan profile detect --force
 
       - name: Verify conan.lock is up-to-date
+        working-directory: test/sample1/tether_sum
         run: |
           # Generate fresh lock file
           conan lock create . --lockfile-out=conan.lock.new
@@ -51,5 +70,6 @@ jobs:
             fi
             echo "conan.lock is up-to-date"
           else
-            echo "::warning::No conan.lock file found. Consider adding one for reproducible builds."
+            echo "::error::No conan.lock file found. Please run 'conan lock create .' and commit it."
+            exit 1
           fi
