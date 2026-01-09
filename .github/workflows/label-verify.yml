@@ -1,0 +1,33 @@
+name: Verify Label
+
+on:
+  pull_request:
+    types: [labeled]
+
+jobs:
+  read-version:
+    if: github.event.label.name == 'verify'
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read version from VERSION file
+        id: version
+        run: |
+          VERSION=$(cat test/sample1/tether_sum/VERSION | tr -d '[:space:]')
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Using version: ${VERSION}"
+
+  integration-test:
+    needs: read-version
+    if: github.event.label.name == 'verify'
+    uses: saba-g467/test-cpp-shared-actions/.github/workflows/integration-test.yml@main
+    with:
+      library-dir: 'test/sample1/tether_sum'
+      consumer-dir: 'test/sample1/tether_sum_package_test'
+      package-name: 'tether_sum'
+      package-version: ${{ needs.read-version.outputs.version }}
+      profile-dir: 'conan-profiles'

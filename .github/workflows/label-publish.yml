@@ -1,0 +1,65 @@
+name: Publish RC on Label
+
+on:
+  pull_request:
+    types: [labeled]
+
+jobs:
+  version-check:
+    if: github.event.label.name == 'publish'
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.read-version.outputs.version }}
+      rc-version: ${{ steps.read-version.outputs.rc-version }}
+      short-sha: ${{ steps.read-version.outputs.short-sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read version from VERSION file
+        id: read-version
+        run: |
+          VERSION=$(cat test/sample1/tether_sum/VERSION | tr -d '[:space:]')
+          SHORT_SHA=${GITHUB_SHA::7}
+          RC_VERSION="${VERSION}-dev-${SHORT_SHA}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "rc-version=${RC_VERSION}" >> $GITHUB_OUTPUT
+          echo "short-sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
+          echo "Version: ${VERSION}"
+          echo "RC Version: ${RC_VERSION}"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Conan
+        run: pip install conan
+
+      - name: Configure Conan remotes
+        run: |
+          conan remote add conan-stable https://conan.pkg.github.com/saba-g467 --force || true
+          conan remote login conan-stable ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check if version exists in conan-stable
+        run: |
+          VERSION=${{ steps.read-version.outputs.version }}
+          if conan search tether_sum/${VERSION}@ -r conan-stable 2>/dev/null; then
+            echo "::error::Version ${VERSION} already exists in conan-stable remote. Please update the VERSION file."
+            exit 1
+          fi
+          echo "Version ${VERSION} does not exist in conan-stable. Proceeding with RC build."
+
+  build-rc:
+    needs: version-check
+    if: github.event.label.name == 'publish'
+    uses: saba-g467/test-cpp-shared-actions/.github/workflows/conan-publish.yml@main
+    with:
+      source-dir: 'test/sample1/tether_sum'
+      package-name: 'tether_sum'
+      package-version: ${{ needs.version-check.outputs.version }}
+      version-suffix: 'dev-${{ needs.version-check.outputs.short-sha }}'
+      remote-name: 'conan-rc'
+      profile-dir: 'conan-profiles'
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
