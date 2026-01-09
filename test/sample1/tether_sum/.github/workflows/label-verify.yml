@@ -5,40 +5,29 @@ on:
     types: [labeled]
 
 jobs:
-  verify:
+  read-version:
     if: github.event.label.name == 'verify'
     runs-on: ubuntu-latest
-
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install Conan
+      - name: Read version from VERSION file
+        id: version
         run: |
-          pip install conan
-          conan profile detect
+          VERSION=$(cat test/sample1/tether_sum/VERSION | tr -d '[:space:]')
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Using version: ${VERSION}"
 
-      - name: Create tether_sum Conan package
-        run: |
-          conan create .
-
-      - name: Install consumer dependencies
-        working-directory: ../tether_sum_package_test
-        run: |
-          conan install . --build=missing
-
-      - name: Build consumer project
-        working-directory: ../tether_sum_package_test
-        run: |
-          cmake --preset conan-release
-          cmake --build --preset conan-release
-
-      - name: Run consumer executable
-        working-directory: ../tether_sum_package_test
-        run: |
-          ./build/Release/tether_sum_package_test
+  integration-test:
+    needs: read-version
+    if: github.event.label.name == 'verify'
+    uses: saba-g467/test-cpp-shared-actions/.github/workflows/integration-test.yml@main
+    with:
+      library-dir: 'test/sample1/tether_sum'
+      consumer-dir: 'test/sample1/tether_sum_package_test'
+      package-name: 'tether_sum'
+      package-version: ${{ needs.read-version.outputs.version }}
+      profile-dir: 'conan-profiles'

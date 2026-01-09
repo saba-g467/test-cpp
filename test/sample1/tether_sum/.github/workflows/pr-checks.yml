@@ -9,19 +9,24 @@ jobs:
   lint:
     name: Lint
     uses: saba-g467/test-cpp-shared-actions/.github/workflows/cpp-lint.yml@main
+    with:
+      source-dir: 'test/sample1/tether_sum'
 
   build-test:
     name: Build and Test
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
     uses: saba-g467/test-cpp-shared-actions/.github/workflows/cpp-build-test.yml@main
     with:
-      os: ${{ matrix.os }}
+      source-dir: 'test/sample1/tether_sum'
+      profile-dir: 'conan-profiles'
+      conan-options: '-o build_tests=True'
+      use-lockfile: true
 
   lock-check:
     name: Verify Conan Lock
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: test/sample1/tether_sum
     steps:
       - name: Checkout
         uses: actions/checkout@v4
