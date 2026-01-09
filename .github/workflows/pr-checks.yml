@@ -19,7 +19,7 @@ jobs:
       source-dir: 'test/sample1/tether_sum'
       profile-dir: 'conan-profiles'
       conan-options: '-o build_tests=True'
-      use-lockfile: true
+      use-lockfile: false
 
   lock-check:
     name: Verify Conan Lock

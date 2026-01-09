@@ -1,0 +1,1 @@
+. "/home/user/projects/saba/test-cpp/test/sample1/tether_sum/build/Release/generators/deactivate_conanbuildenv-release-x86_64.sh"

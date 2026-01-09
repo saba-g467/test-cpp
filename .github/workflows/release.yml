@@ -57,7 +57,7 @@ jobs:
       package-name: 'tether_sum'
       package-version: ${{ needs.check-publish-label.outputs.version }}
       remote-name: 'conan-stable'
-      profile-dir: 'test/sample1/tether_sum/conan-profiles'
+      profile-dir: 'conan-profiles'
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
 

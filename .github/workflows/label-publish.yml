@@ -60,6 +60,6 @@ jobs:
       package-version: ${{ needs.version-check.outputs.version }}
       version-suffix: 'dev-${{ needs.version-check.outputs.short-sha }}'
       remote-name: 'conan-rc'
-      profile-dir: 'test/sample1/tether_sum/conan-profiles'
+      profile-dir: 'conan-profiles'
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}

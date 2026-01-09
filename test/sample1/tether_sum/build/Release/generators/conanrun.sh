@@ -1,0 +1,1 @@
+. "/home/user/projects/saba/test-cpp/test/sample1/tether_sum/build/Release/generators/conanrunenv-release-x86_64.sh"
