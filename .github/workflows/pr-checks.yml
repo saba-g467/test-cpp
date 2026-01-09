@@ -41,7 +41,7 @@ jobs:
         run: |
           echo "Building package with version suffix: dev-${GITHUB_SHA::7}"
           mv conan.lock conan.lock.backup
-          conan create . -o &:build_tests=True -o &:run_tests=True --build=missing
+          conan create . -o tether_sum:build_tests=True -o tether_sum:run_tests=True --build=missing
           mv conan.lock.backup conan.lock
 
   lock-check:
