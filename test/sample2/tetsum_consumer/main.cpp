@@ -1,5 +1,5 @@
-#include <tetsum/tetsum.hpp>
 #include <iostream>
+#include <tetsum/tetsum.hpp>
 
 int main() {
     int result = tetsum::sum(2, 3);
