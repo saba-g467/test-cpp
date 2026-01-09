@@ -1,0 +1,3 @@
+C:/Users/User/Desktop/test/sample1/tether_sum_package_test/build/CMakeFiles/tether_sum_package_test.dir
+C:/Users/User/Desktop/test/sample1/tether_sum_package_test/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/User/Desktop/test/sample1/tether_sum_package_test/build/CMakeFiles/ZERO_CHECK.dir
